@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Appointment - Healthcare System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">Book an Appointment</h4>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                        
+                        <!-- Doctor Debug Information - This will be visible to help debug -->
+                        <div th:if="${doctors != null && doctors.empty}" class="alert alert-warning">
+                            <strong>Warning:</strong> No doctors are available in the system. Please contact an administrator.
+                        </div>
+                        <div th:if="${doctors == null}" class="alert alert-danger">
+                            <strong>Error:</strong> Doctor list is null. Please contact an administrator.
+                        </div>
+                        
+                        <form th:action="@{/appointments/book}" method="post" th:object="${appointment}">
+                            <div class="mb-3">
+                                <label for="doctorId" class="form-label">Select Doctor</label>
+                                <select class="form-select" id="doctorId" name="doctorId" required>
+                                    <option value="">-- Select a Doctor --</option>
+                                    <option th:each="doctor : ${doctors}" 
+                                            th:value="${doctor.id}" 
+                                            th:text="${doctor.firstName != null ? doctor.firstName : ''} + ' ' + ${doctor.lastName != null ? doctor.lastName : ''} + ' (' + ${doctor.specialization != null ? doctor.specialization : 'General'} + ')'">
+                                        Dr. John Smith (Cardiology)
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="appointmentDate" class="form-label">Date</label>
+                                    <input type="date" class="form-control" id="appointmentDate" name="appointmentDate" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="appointmentTime" class="form-label">Time</label>
+                                    <input type="time" class="form-control" id="appointmentTime" name="appointmentTime" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="reason" class="form-label">Reason for Visit</label>
+                                <textarea class="form-control" id="reason" th:field="*{reason}" rows="3" required></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="notes" class="form-label">Additional Notes (Optional)</label>
+                                <textarea class="form-control" id="notes" th:field="*{notes}" rows="2"></textarea>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">Book Appointment</button>
+                                <a th:href="@{/appointments}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set minimum date to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('appointmentDate').min = today;
+            
+            // Default to today
+            document.getElementById('appointmentDate').value = today;
+        });
+    </script>
+</body>
+</html>

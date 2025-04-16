@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Healthcare System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container mt-4">
+        <!-- Error message display -->
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}">Error message</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <h2>Dashboard</h2>
+        <p class="lead">Welcome, <span th:text="${authenticatedUser != null ? authenticatedUser : #authentication.name}">User</span>!</p>
+        
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-calendar-check me-2 text-primary"></i>Appointments</h5>
+                        <p class="card-text">Manage your upcoming and past appointments.</p>
+                        <div class="d-grid">
+                            <a th:href="@{/appointments}" class="btn btn-primary">View Appointments</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-capsule me-2 text-primary"></i>Medications</h5>
+                        <p class="card-text">Track and manage your medications and prescriptions.</p>
+                        <div class="d-grid">
+                            <a th:href="@{/medications}" class="btn btn-primary">View Medications</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="bi bi-person me-2 text-primary"></i>Profile</h5>
+                        <p class="card-text">Update your personal and medical information.</p>
+                        <div class="d-grid">
+                            <a th:href="@{/profile}" class="btn btn-primary">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-2">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Upcoming Appointments</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${upcomingAppointments == null || upcomingAppointments.empty}">
+                            <p>No upcoming appointments.</p>
+                            <a th:href="@{/appointments/book}" class="btn btn-sm btn-outline-primary">Book an Appointment</a>
+                        </div>
+                        <div th:if="${upcomingAppointments != null && !upcomingAppointments.empty}">
+                            <div class="list-group">
+                                <a th:each="appointment : ${upcomingAppointments}" 
+                                   th:href="@{/appointments/{id}(id=${appointment.id})}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1" th:text="${appointment.doctor != null ? appointment.doctor.firstName + ' ' + appointment.doctor.lastName : 'Unknown Doctor'}">Doctor Name</h6>
+                                        <small th:text="${appointment.appointmentDateTime != null ? #temporals.format(appointment.appointmentDateTime, 'MMM dd, yyyy') : 'No date'}">Date</small>
+                                    </div>
+                                    <p class="mb-1" th:text="${appointment.reason != null ? appointment.reason : 'No reason specified'}">Reason</p>
+                                    <small th:text="${appointment.appointmentDateTime != null ? #temporals.format(appointment.appointmentDateTime, 'hh:mm a') : 'No time'}">Time</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Current Medications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${medications == null || medications.empty}">
+                            <p>No current medications.</p>
+                            <a th:href="@{/medications/add}" class="btn btn-sm btn-outline-primary">Add Medication</a>
+                        </div>
+                        <div th:if="${medications != null && !medications.empty}">
+                            <div class="list-group">
+                                <a th:each="medication : ${medications}" 
+                                   th:href="@{/medications/{id}(id=${medication.id})}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1" th:text="${medication.name != null ? medication.name : 'Unknown Medication'}">Medication Name</h6>
+                                        <small th:text="${medication.dosage != null ? medication.dosage : 'No dosage'}">Dosage</small>
+                                    </div>
+                                    <p class="mb-1" th:text="${medication.frequency != null ? medication.frequency : 'No frequency'}">Frequency</p>
+                                    <small th:if="${medication.endDate != null}" 
+                                           th:text="'Until ' + ${#temporals.format(medication.endDate, 'MMM dd, yyyy')}">
+                                        End Date
+                                    </small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medications - Healthcare System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>My Medications</h2>
+            <a th:href="@{/medications/add}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Add Medication
+            </a>
+        </div>
+        
+        <div th:if="${param.added}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Medication added successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${param.updated}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Medication updated successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${param.deleted}" class="alert alert-info alert-dismissible fade show" role="alert">
+            Medication deleted successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            An error occurred. Please try again.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${medications == null || medications.empty}">
+            <div class="alert alert-info">
+                You don't have any medications in your list.
+                <a th:href="@{/medications/add}" class="alert-link">Add a medication</a>
+            </div>
+        </div>
+        
+        <div th:if="${medications != null && !medications.empty}">
+            <div class="row">
+                <div class="col-md-4 mb-4" th:each="medication : ${medications}">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0" th:text="${medication.name}">Medication Name</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <p class="mb-1"><strong>Dosage:</strong> <span th:text="${medication.dosage}">10mg</span></p>
+                                <p class="mb-1"><strong>Frequency:</strong> <span th:text="${medication.frequency}">Twice daily</span></p>
+                                <p class="mb-1" th:if="${medication.startDate != null}">
+                                    <strong>Start Date:</strong> 
+                                    <span th:text="${#temporals.format(medication.startDate, 'MMM dd, yyyy')}">Jan 01, 2023</span>
+                                </p>
+                                <p class="mb-1" th:if="${medication.endDate != null}">
+                                    <strong>End Date:</strong> 
+                                    <span th:text="${#temporals.format(medication.endDate, 'MMM dd, yyyy')}">Jan 31, 2023</span>
+                                </p>
+                            </div>
+                            
+                            <div th:if="${medication.instructions != null && !medication.instructions.isEmpty()}">
+                                <h6>Instructions:</h6>
+                                <p th:text="${medication.instructions}">Take with food</p>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white d-flex justify-content-end">
+                            <a th:href="@{/medications/{id}/edit(id=${medication.id})}" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                            <a th:href="@{/medications/{id}/delete(id=${medication.id})}" class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Are you sure you want to delete this medication?')">
+                                <i class="bi bi-trash"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>

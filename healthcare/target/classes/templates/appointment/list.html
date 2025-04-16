@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointments - Healthcare System</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+    
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>My Appointments</h2>
+            <a th:href="@{/appointments/book}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Book New Appointment
+            </a>
+        </div>
+        
+        <div th:if="${param.booked}" class="alert alert-success alert-dismissible fade show" role="alert">
+            Appointment booked successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${param.cancelled}" class="alert alert-info alert-dismissible fade show" role="alert">
+            Appointment cancelled successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            An error occurred. Please try again.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        
+        <ul class="nav nav-tabs mb-4" id="appointmentTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab">
+                    Upcoming
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="past-tab" data-bs-toggle="tab" data-bs-target="#past" type="button" role="tab">
+                    Past
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab">
+                    Cancelled
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="appointmentTabsContent">
+            <div class="tab-pane fade show active" id="upcoming" role="tabpanel">
+                <div th:if="${appointments == null || appointments.empty}">
+                    <div class="alert alert-info">
+                        You don't have any upcoming appointments.
+                        <a th:href="@{/appointments/book}" class="alert-link">Book an appointment</a>
+                    </div>
+                </div>
+                <div th:if="${appointments != null && !appointments.empty}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="appointment : ${appointments}" th:if="${appointment.status != null && appointment.status.name() == T(com.healthcare.model.Appointment.Status).SCHEDULED.name()}">
+                                    <td th:text="${appointment.doctor != null ? appointment.doctor.firstName + ' ' + appointment.doctor.lastName : 'N/A'}">Dr. Smith</td>
+                                    <td th:text="${appointment.appointmentDateTime != null ? #temporals.format(appointment.appointmentDateTime, 'MMM dd, yyyy') : 'N/A'}">Jan 01, 2023</td>
+                                    <td th:text="${appointment.appointmentDateTime != null ? #temporals.format(appointment.appointmentDateTime, 'hh:mm a') : 'N/A'}">10:00 AM</td>
+                                    <td th:text="${appointment.reason != null ? appointment.reason : 'N/A'}">Checkup</td>
+                                    <td><span class="badge bg-success">Scheduled</span></td>
+                                    <td>
+                                        <a th:href="@{/appointments/{id}(id=${appointment.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a th:href="@{/appointments/{id}/cancel(id=${appointment.id})}" class="btn btn-sm btn-outline-danger" 
+                                           onclick="return confirm('Are you sure you want to cancel this appointment?')">
+                                            <i class="bi bi-x-circle"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="past" role="tabpanel">
+                <div th:if="${appointments == null || appointments.empty}">
+                    <div class="alert alert-info">
+                        You don't have any past appointments.
+                    </div>
+                </div>
+                <div th:if="${appointments != null && !appointments.empty}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="appointment : ${appointments}" th:if="${appointment.status != null && appointment.status.name() == T(com.healthcare.model.Appointment.Status).COMPLETED.name()}">
+                                    <td th:text="${appointment.doctor != null ? appointment.doctor.firstName + ' ' + appointment.doctor.lastName : 'N/A'}">Dr. Smith</td>
+                                    <td th:text="${appointment.appointmentDateTime != null ? #temporals.format(appointment.appointmentDateTime, 'MMM dd, yyyy') : 'N/A'}">Jan 01, 2023</td>
+                                    <td th:text="${appointment.appointmentDateTime != null ? #temporals.format(appointment.appointmentDateTime, 'hh:mm a') : 'N/A'}">10:00 AM</td>
+                                    <td th:text="${appointment.reason != null ? appointment.reason : 'N/A'}">Checkup</td>
+                                    <td><span class="badge bg-info">Completed</span></td>
+                                    <td>
+                                        <a th:href="@{/appointments/{id}(id=${appointment.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-pane fade" id="cancelled" role="tabpanel">
+                <div th:if="${appointments == null || appointments.empty}">
+                    <div class="alert alert-info">
+                        You don't have any cancelled appointments.
+                    </div>
+                </div>
+                <div th:if="${appointments != null && !appointments.empty}">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Doctor</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="appointment : ${appointments}" th:if="${appointment.status != null && appointment.status.name() == T(com.healthcare.model.Appointment.Status).CANCELLED.name()}">
+                                    <td th:text="${appointment.doctor != null ? appointment.doctor.firstName + ' ' + appointment.doctor.lastName : 'N/A'}">Dr. Smith</td>
+                                    <td th:text="${appointment.appointmentDateTime != null ? #temporals.format(appointment.appointmentDateTime, 'MMM dd, yyyy') : 'N/A'}">Jan 01, 2023</td>
+                                    <td th:text="${appointment.appointmentDateTime != null ? #temporals.format(appointment.appointmentDateTime, 'hh:mm a') : 'N/A'}">10:00 AM</td>
+                                    <td th:text="${appointment.reason != null ? appointment.reason : 'N/A'}">Checkup</td>
+                                    <td><span class="badge bg-secondary">Cancelled</span></td>
+                                    <td>
+                                        <a th:href="@{/appointments/{id}(id=${appointment.id})}" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="fragments/footer :: footer"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/main.js}"></script>
+</body>
+</html>
